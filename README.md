@@ -9,7 +9,9 @@
 By the end of this lesson, students should be able to:
 
 -   Recall whether or not `this` is determined at declaration.
+  - ```no... it's determined when we invoke the function```
 -   Explain what `this` points to in each calling context.
+  - ```Calling contexts: .call, .apply, normal function invocation, method invocation, constructor function```
 -   Read and follow the execution context of code that uses different `this`
 idioms.
 
@@ -378,6 +380,30 @@ Since ```counter.add()``` calls ```add()``` with `this` referring to `counter`,
 passing ```anyObject``` into ```forEach()``` makes `this` in the ```forEach()```
 callback refer to ```anyObject```.
 
+#### Live example:
+```javascript
+let anyObject = {
+  sum: 0,
+  count: 0
+};
+
+let counter = {
+  sum: 0,
+  count: 0,
+  add: function (array){
+    array.forEach(this.sumAndCount, anyObject);  // Note 2nd argument
+  },
+  sumAndCount: function (entry){
+    this.sum += entry;
+    ++this.count;
+  }
+}
+
+counter.add([1,2,3]);
+console.log(counter.sum); // what logs?
+console.log(anyObject.sum); // what logs?
+```
+
 [forEach - JavaScript | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
 
 ## Extra: Fat Arrow
@@ -412,7 +438,7 @@ let counter = {
   sum: 0,
   count: 0,
   add: function (array){
-    array.forEach((e) => { this.sumAndCount(e) });
+    array.forEach((e) => { this.sumAndCount(e) }); //fat arrow lets `this` stay with what it was!
   },
   sumAndCount: function (entry){
     this.sum += entry;
@@ -439,12 +465,17 @@ let user = {
   clickHandler: function(event){
     let randomNum = ((Math.random() * 2 | 0) + 1) - 1; // random number between 0 and 1​
     // This line is adding a random person from the data array to the text field​
-    $ ("input").val(this.data[randomNum].name + " " + this.data[randomNum].age);
+    $ ("input").val(this.data[randomNum].name + " " + this.data[randomNum].handicap);
   }
 }
 ​
 ​// Assign an eventHandler to the button's click event​
 $ ("button").on('click', user.clickHandler);
+
+// LOL this won't work
+// when we do this, makes the value of `this` the thing we're calling in jQuery
+// jQuery sets the `this`!!!
+// so here, `this` is referencing button, not input
 ```
 
 What is happening and will this work?
@@ -454,6 +485,9 @@ user object like so:
 
 ```javascript
 $ ("button").on('click', user.clickHandler.bind(user));
+// .bind can be used in a callback... it doesn't invoke the function
+// it just sets the reference that `this` should be when a function does get called
+// .bind tells `this` to be the user here
 ```
 
 ## Summary
